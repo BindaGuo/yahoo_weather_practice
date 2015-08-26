@@ -1,6 +1,7 @@
 <html>
 <head>
 	<title>Yahoo氣象API練習</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body>
 	<div id="home" data-role="page">
@@ -18,35 +19,5 @@
 	</div>
 </body>
 <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.0.min.js"></script>
-<script type="text/javascript">
-$(document).ready(function(){
-	//預設台北
-	weather('2306179');
-});
-$('#area').bind('input propertychange',function(){
-	weather($('#area').val());
-});
-function weather(code) {
-	var weather, title, content,
-	rss = 'http://weather.yahooapis.com/forecastrss?w='+code+'&u=c',
-	url = 'https://ajax.googleapis.com/ajax/services/feed/load?v=1.0&callback=?&q=' + encodeURIComponent(rss);
-	$.ajax({
-		type: "GET",
-		url: url,
-		dataType: "json",
-		error: function (e) {
-			console.log('error');
-		},
-		success: function (e) {
-			console.log(e);
-			weather = $(e);
-			content = weather[0].responseData.feed.entries[0].content;
-			//會印出<img src="..."><br><b>Current Conditions:</b><br>Mostly Cloudy, 30 C<br>
-			var w_img = content.split("<br>")[0];
-			var w_current = content.split("<br>")[2];
-			$('#content').html(w_img+w_current);
-		}
-	});
-}
-</script>
+
 </html>
