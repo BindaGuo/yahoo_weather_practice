@@ -6,4 +6,4 @@ yahoo wheater api可以不用煩惱跨領域問題，不過不足的點在更新
 代碼是參考【I樂園】oocatoo大大親自整理的台灣代碼(http://ifansland.com/thread-15103-1-1.html)
 一些天氣壯闊或是詳細文件是參考YAHOO官方文件(https://developer.yahoo.com/weather/documentation.html#request)
 
-預設為台北
+除此之外嘗試之前有聽過卻沒做過的地理定位，只要連上網路就能去判斷你的經緯度，再由Google Maps Javascript API去抓目前的地址，進而知道使用者區域，再去做天氣的顯示，若都沒選預設台北。
