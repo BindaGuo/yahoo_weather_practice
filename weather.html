@@ -1,13 +1,13 @@
 <html>
 <head>
 	<title>Yahoo氣象API練習</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body>
-	<div id="home" data-role="page">
-		<div data-role="header" data-position="fixed" data-theme="b">
-			<h3></h3>
-		</div>
+	<!-- 預設台北or定位位置 -->
+	<div id="weather">
 		<select id="area">
+			<option>預設</option>
 			<option value="2306179">台北</option>
 			<option value="2306188">基隆</option>
 			<option value="2306181">台中</option>
@@ -18,14 +18,75 @@
 	</div>
 </body>
 <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.0.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
 <script type="text/javascript">
 $(document).ready(function(){
-	//預設台北
 	weather('2306179');
+	gps();
 });
-$('#area').bind('input propertychange',function(){
+// 下拉選單的事件，自選用
+$('#area').change(function(){
+	console.log("try");
 	weather($('#area').val());
 });
+// 詢問是否定位，使用地理定位功能
+function gps() {
+	if (navigator.geolocation) {
+		var geo=navigator.geolocation;
+		var option={
+			enableAcuracy:false,
+			maximumAge:0,
+			timeout:600000
+		};
+		geo.getCurrentPosition(successCallback,
+			errorCallback,
+			option
+			);
+	}
+	else {alert("此瀏覽器不支援地理定位功能!");}
+	function successCallback(position) {
+		// 經度
+		var latitude = position.coords.latitude;
+		// 緯度
+		var longitude = position.coords.longitude;
+		// 將經緯度去尋找位置，使用Google Maps Javascript API
+		var geocoder = new google.maps.Geocoder();
+		var coord = new google.maps.LatLng(latitude, longitude);
+		geocoder.geocode({'latLng': coord }, function(results, status) {
+			if (status === google.maps.GeocoderStatus.OK) {
+				if (results) { 
+					// 將地址字串切割，若是不成功，預設台北
+					console.log(results[0].formatted_address); 
+					var site = results[0].formatted_address.split("台灣")[1].substring(0, 2);
+					console.log(site);
+					var code;
+					switch(site){
+						case '台北': weather('2306179');break;
+						case '基隆': weather('2306188');break;
+						case '台中': weather('2306181');break;
+						case '彰化': weather('2306195');break;
+						case '花蓮': weather('2306187');break;
+						default:weather('2306179');
+					}
+				}
+			}
+			else {
+				alert("Reverse Geocoding failed because: " + status);
+			}
+		});
+	}
+	function errorCallback(error) {
+		var errorTypes={
+			0:"不明原因錯誤",
+			1:"使用者拒絕提供位置資訊",
+			2:"無法取得位置資訊",
+			3:"位置查詢逾時"
+		};
+		alert(errorTypes[error.code]);
+		alert("code=" + error.code + " " + error.message); //開發測試時用
+	}
+}
+// 使用yahoo weather api
 function weather(code) {
 	var weather, title, content,
 	rss = 'http://weather.yahooapis.com/forecastrss?w='+code+'&u=c',
@@ -40,11 +101,13 @@ function weather(code) {
 		success: function (e) {
 			console.log(e);
 			weather = $(e);
+			//字串切割，切出title、圖片、當下天氣
 			content = weather[0].responseData.feed.entries[0].content;
 			//會印出<img src="..."><br><b>Current Conditions:</b><br>Mostly Cloudy, 30 C<br>
+			var title = weather[0].responseData.feed.entries[0].title.split(" ")[2];
 			var w_img = content.split("<br>")[0];
 			var w_current = content.split("<br>")[2];
-			$('#content').html(w_img+w_current);
+			$('#content').html(title+w_img+w_current);
 		}
 	});
 }
